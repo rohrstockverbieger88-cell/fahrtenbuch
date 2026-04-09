@@ -219,24 +219,32 @@
 
 <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyCTyjcE1-hU8L30vhg6JGtS7dWR06hNX0E",
-      authDomain: "fahrtenbuch-a97b3.firebaseapp.com",
-      projectId: "fahrtenbuch-a97b3",
-      storageBucket: "fahrtenbuch-a97b3.firebasestorage.app",
-      messagingSenderId: "67152632092",
-      appId: "1:67152632092:web:72779b455646ec9d4482d9",
-      measurementId: "G-14CW6G43QV"
+      apiKey: "AIzaSyAmoLu-EDvg7JOBSuYv4v9k0IAYUArJLUk",
+      authDomain: "fahrtenbuch-1ed62.firebaseapp.com",
+      projectId: "fahrtenbuch-1ed62",
+      storageBucket: "fahrtenbuch-1ed62.firebasestorage.app",
+      messagingSenderId: "494959193956",
+      appId: "1:494959193956:web:24a22f588474f86da5d471",
+      measurementId: "G-7L6J3Z8ERR",
+      databaseURL: "https://fahrtenbuch-1ed62-default-rtdb.europe-west1.firebasedatabase.app" // Automatisch für dein neues Projekt (Europa) angepasst
     };
 
     firebase.initializeApp(firebaseConfig);
     const fbDb = firebase.database();
 
-    let state = {
+    // 1. Lade lokalen Stand zur Sicherheit
+    let state = JSON.parse(localStorage.getItem('fb_2026_hybrid')) || {
         users: [{email:'admin', pass:'admin', isAdmin:true, fname:'System', lname:'Admin', dept:'IT', isOTP: true}],
         cars: [], entries: [], controlStatus: []
     };
+    if (!state.controlStatus) state.controlStatus = [];
+    if (!state.cars) state.cars = [];
+    if (!state.users) state.users = [];
+    if (!state.entries) state.entries = [];
+
     let currentUser = null; let activeCar = null; let activeFilter = { type: 'month', value: new Date().toISOString().slice(0,7) };
 
+    // 2. Höre auf die Datenbank
     fbDb.ref('fBuchState').on('value', snap => {
         if(snap.exists() && snap.val()) {
             state = snap.val();
@@ -244,10 +252,15 @@
             if (!state.cars) state.cars = [];
             if (!state.users) state.users = [];
             if (!state.entries) state.entries = [];
+            
+            // Lokales Backup bei jedem Online-Sync
+            localStorage.setItem('fb_2026_hybrid', JSON.stringify(state));
         } else {
-            save(); // initial push
+            // Falls Firebase leer ist (erster Start), lade lokale Daten hoch
+            saveToFirebaseSilently();
         }
         
+        // UI aktualisieren, falls eingeloggt
         if (currentUser) {
             checkNotifications(); 
             if (!document.getElementById('viewDash').classList.contains('hidden')) renderCars();
@@ -257,9 +270,21 @@
             }
             if (!document.getElementById('viewAdminControl').classList.contains('hidden')) renderAdminControl();
         }
+    }, error => {
+        console.error("Firebase Fehler (Regeln/URL?):", error);
     });
 
-    function save() { fbDb.ref('fBuchState').set(state).catch(e => alert("Firebase Speicherfehler: " + e.message)); }
+    // Diese Speichern-Funktion speichert IMMER lokal, und versucht es online
+    function save() { 
+        localStorage.setItem('fb_2026_hybrid', JSON.stringify(state));
+        saveToFirebaseSilently();
+    }
+
+    function saveToFirebaseSilently() {
+        fbDb.ref('fBuchState').set(state).catch(e => {
+            console.error("Daten wurden nur lokal gespeichert. Firebase Fehler: " + e.message);
+        });
+    }
 
     /* --- LOGIN --- */
     function handleLogin() {
