@@ -9,53 +9,348 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #2563eb; --dark: #1e293b; --light: #f1f5f9; --danger: #ef4444; --success: #22c55e; --warning: #f59e0b; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--light); margin: 0; color: var(--dark); overflow-x: hidden; }
+        :root { 
+            --primary: #2563eb; 
+            --primary-dark: #1d4ed8;
+            --primary-light: #eff6ff;
+            --accent: #3b82f6;
+            --dark: #0f172a; 
+            --dark-surface: #1e293b;
+            --light: #f8fafc; 
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --danger: #ef4444; 
+            --success: #10b981; 
+            --warning: #f59e0b; 
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.04);
+        }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: #f1f5f9; 
+            margin: 0; 
+            color: var(--text); 
+            overflow-x: hidden;
+            width: 100%;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
         .hidden { display: none !important; }
 
-        /* KENNZEICHEN DESIGN */
-        .license-plate {
-            background: white; border: 2px solid #333; border-radius: 6px;
-            display: inline-flex; align-items: center; font-family: 'Arial Black', sans-serif;
-            color: black; padding: 0; overflow: hidden; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-            height: 45px; min-width: 200px;
+        /* Modernized Header */
+        header { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 0.75rem 1.25rem; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08); 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
         }
-        .plate-eu { background: #003399; color: white; width: 25px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 8px; line-height: 1; }
-        .plate-text { padding: 0 15px; font-size: 1.5rem; letter-spacing: 2px; text-transform: uppercase; }
+        .header-brand { display: flex; align-items: center; gap: 12px; }
+        .burger-btn { 
+            font-size: 1.5rem; 
+            cursor: pointer; 
+            background: #f1f5f9; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 10px;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark);
+            transition: all 0.2s;
+        }
+        .burger-btn:active { transform: scale(0.95); background: #e2e8f0; }
 
-        header { background: white; padding: 1rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        .burger-btn { font-size: 1.8rem; cursor: pointer; background: none; border: none; }
-        
-        .sidebar { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: var(--dark); color: white; transition: 0.3s; z-index: 400; padding: 2rem 1rem; box-shadow: 5px 0 15px rgba(0,0,0,0.3); }
-        .sidebar.open { left: 0; }
-        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 350; }
-        .menu-item { display: block; padding: 12px; color: #cbd5e1; text-decoration: none; border-radius: 8px; margin-bottom: 5px; cursor: pointer; }
-        .menu-item:hover { background: #334155; color: white; }
+        /* Modern Sidebar */
+        .sidebar { 
+            position: fixed; top: 0; left: -320px; width: 300px; height: 100%; 
+            background: var(--dark); color: white; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            z-index: 400; padding: 2rem 1.25rem; box-shadow: 10px 0 25px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column;
+        }
+        .sidebar.open { transform: translateX(320px); }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; z-index: 350; }
+        .sidebar h2 { font-size: 1.4rem; font-weight: 700; margin-top: 0; margin-bottom: 1.5rem; color: #f8fafc; letter-spacing: -0.02em; }
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; color: #94a3b8; text-decoration: none; border-radius: var(--radius-md); margin-bottom: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+        .menu-item:hover, .menu-item:active { background: var(--dark-surface); color: white; transform: translateX(3px); }
 
-        .container { max-width: 1400px; margin: 2rem auto; padding: 0 1rem; }
-        .car-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
-        .car-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; text-align: left; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .car-card:hover { transform: translateY(-3px); border-color: var(--primary); }
-        
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 500; }
-        .modal-content { background: white; padding: 2rem; border-radius: 16px; width: 95%; max-width: 800px; max-height: 90vh; overflow-y: auto; position: relative; }
-        
-        input, select, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 1rem; transition: border 0.2s; }
-        .field-error { border: 2px solid var(--danger) !important; background-color: #fff1f1; }
+        /* Main Container */
+        .container { max-width: 1200px; margin: 1.25rem auto; padding: 0 1rem; width: 100%; }
 
-        button { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
-        .btn-p { background: var(--primary); color: white; }
-        .btn-s { background: #e2e8f0; color: var(--dark); }
+        /* License Plate Styling */
+        .license-plate {
+            background: #ffffff; border: 2.5 solid #1e293b; border-radius: 8px;
+            display: inline-flex; align-items: center; font-family: 'Arial Black', sans-serif;
+            color: #0f172a; padding: 0; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+            height: 42px; min-width: 190px; border: 2px solid #1e293b;
+        }
+        .plate-eu { background: #003399; color: white; width: 26px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 9px; font-weight: bold; line-height: 1; padding: 2px; }
+        .plate-text { padding: 0 14px; font-size: 1.35rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 900; }
+
+        /* Car Grid / Kacheln */
+        .car-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+        .car-card { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+            border-radius: var(--radius-lg); 
+            padding: 1.25rem; 
+            text-align: left; 
+            cursor: pointer; 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+            box-shadow: var(--shadow-sm); 
+            position: relative;
+            overflow: hidden;
+        }
+        .car-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
+        .car-card:active { transform: scale(0.98); }
+        .car-card p { font-size: 1.1rem; font-weight: 700; margin: 0.75rem 0 0.5rem 0; color: var(--dark); }
+        .resp-info { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 6px; }
+
+        /* Modern Mobile-Optimized Entry Tiles / Mobile Kacheln */
+        .entries-container { margin-top: 1.25rem; }
+        .entry-tile-grid { display: flex; flex-direction: column; gap: 1rem; }
+        
+        .entry-tile {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.15rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .entry-tile:hover, .entry-tile:active {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+        .entry-tile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .entry-date-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .entry-driver-tag {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .entry-tile-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        .entry-route {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .entry-meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.25rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .entry-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: #f8fafc;
+            padding: 4px 10px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .entry-stats-box {
+            background: #f8fafc;
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        .entry-km-highlight {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .fuel-badge-pill {
+            background: #fffbeb;
+            color: #b45309;
+            border: 1px solid #fde68a;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .comment-badge-pill {
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            margin-top: 0.5rem;
+            line-height: 1.4;
+        }
+
+        /* Filter bar responsiveness */
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+            background: var(--card-bg);
+            padding: 0.85rem;
+            border-radius: var(--radius-lg);
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+        .filter-bar input[type="date"] {
+            width: auto;
+            margin: 0;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+        }
+
+        /* Modals & Dialogs */
+        .modal { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(15, 23, 42, 0.7); 
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center; 
+            z-index: 500; 
+            padding: 1rem;
+        }
+        .modal-content { 
+            background: var(--card-bg); 
+            padding: 1.75rem; 
+            border-radius: var(--radius-lg); 
+            width: 100%; 
+            max-width: 550px; 
+            max-height: 90vh; 
+            overflow-y: auto; 
+            position: relative; 
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            animation: modalSlideUp 0.25s ease-out;
+        }
+        @keyframes modalSlideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Inputs & Controls - Optimized for Touch (Mobile) */
+        input, select, textarea { 
+            width: 100%; 
+            padding: 12px 14px; 
+            margin: 6px 0 12px 0; 
+            border: 1.5px solid var(--border); 
+            border-radius: var(--radius-md); 
+            box-sizing: border-box; 
+            font-size: 1rem; 
+            font-family: inherit;
+            background: #ffffff;
+            color: var(--text);
+            transition: all 0.2s; 
+            min-height: 46px;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.15);
+        }
+        .field-error { border: 2px solid var(--danger) !important; background-color: #fef2f2; }
+
+        /* Buttons Touch Target Friendly */
+        button { 
+            padding: 12px 20px; 
+            border-radius: var(--radius-md); 
+            border: none; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 0.95rem;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 44px;
+        }
+        button:active { transform: scale(0.97); }
+        .btn-p { background: var(--primary); color: white; box-shadow: 0 2px 4px rgba(37,99,235,0.2); }
+        .btn-p:hover { background: var(--primary-dark); }
+        .btn-s { background: #f1f5f9; color: var(--dark); border: 1px solid #cbd5e1; }
+        .btn-s:hover { background: #e2e8f0; }
         .btn-d { background: var(--danger); color: white; }
         .btn-w { background: var(--warning); color: white; }
 
-        .user-card { background: #fff; border: 1px solid #eee; padding: 12px; margin-bottom: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
-        th { background: #f8fafc; }
-        .fuel-tag { background: var(--warning); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
-        .entry-row:hover { background: #f8fafc; cursor: pointer; transition: 0.2s; }
+        .user-card { 
+            background: #fff; border: 1px solid var(--border); padding: 14px; 
+            margin-bottom: 10px; border-radius: var(--radius-md); 
+            display: flex; justify-content: space-between; align-items: center; 
+            box-shadow: var(--shadow-sm); 
+        }
+
+        /* Mobile Breakpoints & Adjustments */
+        @media (max-width: 640px) {
+            header h2 { font-size: 1rem !important; }
+            #siteLogo { height: 40px !important; margin-left: 8px !important; }
+            .container { padding: 0 0.75rem; margin: 0.75rem auto; }
+            .modal-content { padding: 1.25rem; border-radius: var(--radius-lg); }
+            .car-grid { grid-template-columns: 1fr; }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .filter-bar button, .filter-bar input { width: 100%; }
+            .detail-header-row { flex-direction: column; align-items: flex-start !important; gap: 12px; }
+            .detail-actions { width: 100%; justify-content: space-between; }
+        }
     </style>
 </head>
 <body>
@@ -118,7 +413,7 @@
                     <button id="adminEditCarBtn" class="btn-s hidden" onclick="openEditCarModal()">⚙️ Stammdaten</button>
                 </div>
             </div>
-            <div id="filterControls" style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; background: white; padding: 10px; border-radius: 8px; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div id="filterControls" class="filter-bar">
                 <button class="btn-s" onclick="setFilter('current')">Aktueller Monat</button>
                 <button class="btn-s" onclick="setFilter('prev')">Letzter Monat</button>
                 <button class="btn-s" onclick="setFilter('all')">Komp. Historie</button>
@@ -584,7 +879,7 @@
         doc.save(`Fahrtenbuch_${activeCar.plate}_${monthStr}.pdf`);
     }
 
-    function renderEntries() {
+        function renderEntries() {
         let carE = state.entries.filter(e => e.plate === activeCar.plate);
         let filterText = "";
         if (activeFilter.type === 'month') {
@@ -609,23 +904,60 @@
                 if (currentUser.isAdmin && !isControlled.adminTimestamp) {
                     document.getElementById('controlBtnContainer').innerHTML = `<button class="btn-p" style="background: var(--primary); width: 100%; margin-bottom: 15px;" onclick="submitControl('${activeFilter.value}')">☑️ Finale Admin-Kontrolle für ${activeFilter.value} abschließen</button>`;
                 } else if (isControlled.adminTimestamp) {
-                    document.getElementById('controlBtnContainer').innerHTML = `<div style="background: #ecfdf5; color: var(--success); padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; border: 1px solid #10b981;">☑️ Monat ${activeFilter.value} ist durch den Admin final kontrolliert (Schreibgeschützt)</div>`;
+                    document.getElementById('controlBtnContainer').innerHTML = `<div style="background: #ecfdf5; color: var(--success); padding: 12px; border-radius: var(--radius-md); margin-bottom: 15px; text-align: center; font-weight: bold; border: 1px solid #10b981;">☑️ Monat ${activeFilter.value} ist durch den Admin final kontrolliert (Schreibgeschützt)</div>`;
                 } else {
-                   document.getElementById('controlBtnContainer').innerHTML = `<div style="background: #fffbeb; color: var(--warning); padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; border: 1px solid #fcd34d;">⚠️ Von dir kontrolliert, wartet auf finale Admin Prüfung</div>`;
+                   document.getElementById('controlBtnContainer').innerHTML = `<div style="background: #fffbeb; color: var(--warning); padding: 12px; border-radius: var(--radius-md); margin-bottom: 15px; text-align: center; font-weight: bold; border: 1px solid #fcd34d;">⚠️ Von dir kontrolliert, wartet auf finale Admin Prüfung</div>`;
                 }
             }
         }
 
-        if(!carE.length) { document.getElementById('currentTable').innerHTML = "<p>Keine Einträge für diesen Zeitraum.</p>"; return; }
-        let h = `<table><tr><th>Datum</th><th>Ziel / KST</th><th>Zeit</th><th>KM</th><th>Gefahren / Tank</th>${activeCar.responsibleEmail===currentUser.email||currentUser.isAdmin?'<th></th>':''}</tr>`;
+        if(!carE.length) { 
+            document.getElementById('currentTable').innerHTML = "<div style='text-align:center; padding:2rem; color:var(--text-muted); font-weight:500;'>Keine Fahrten für diesen Zeitraum erfasst.</div>"; 
+            return; 
+        }
+
+        let canEdit = activeCar.responsibleEmail === currentUser.email || currentUser.isAdmin;
+        let html = `<div class="entry-tile-grid">`;
+        
         carE.slice().reverse().forEach(e => { 
             let euid = e.uid || e.timestamp;
-            let canEdit = activeCar.responsibleEmail===currentUser.email || currentUser.isAdmin;
-            let displayRemark = e.comment ? `<br><small style="color:var(--primary)">${e.comment}</small>` : '';
-            let fuelStr = e.fuel ? `<br><span class="fuel-tag">⛽ ${e.fuel} km | ${e.fuelLiters?e.fuelLiters+' L':''} | ${e.fuelPrice?e.fuelPrice+' €':''}</span>` : '';
-            h += `<tr class="entry-row" ${canEdit ? `onclick="openEntryModalForEdit('${euid}')"` : ''}><td><strong>${e.date.split("-").reverse().join(".")}</strong><br><small>${e.driver}</small></td><td>${e.destination}<br><small>KST: ${e.costCenter}</small>${displayRemark}</td><td>${e.timeStart}-${e.timeEnd}</td><td>${e.kmStart}/${e.kmEnd}</td><td><strong>${e.diff} km</strong>${fuelStr}</td>${canEdit?'<td style="color:#94a3b8; font-size:1.2rem;">✏️</td>':''}</tr>`; 
+            let formattedDate = e.date.split("-").reverse().join(".");
+            let fuelInfo = e.fuel ? `<div class="fuel-badge-pill">⛽ Tanken: ${e.fuel} km | ${e.fuelLiters?e.fuelLiters+' L':'-'} | ${e.fuelPrice?e.fuelPrice+' €':'-'}</div>` : '';
+            let remarkInfo = e.comment ? `<div class="comment-badge-pill">📝 ${e.comment}</div>` : '';
+            
+            html += `
+            <div class="entry-tile" ${canEdit ? `onclick="openEntryModalForEdit('${euid}')"` : ''} style="${canEdit?'cursor:pointer;':''}">
+                <div class="entry-tile-header">
+                    <span class="entry-date-badge">📅 ${formattedDate}</span>
+                    <span class="entry-driver-tag">👤 ${e.driver}</span>
+                    ${canEdit ? '<span style="color:var(--primary); font-size:1.1rem;">✏️</span>' : ''}
+                </div>
+                <div class="entry-tile-body">
+                    <div class="entry-route">
+                        <span>📍 ${e.destination}</span>
+                    </div>
+                    <div class="entry-meta-row">
+                        <div class="entry-meta-item">🕒 ${e.timeStart} - ${e.timeEnd} Uhr</div>
+                        <div class="entry-meta-item">🏷️ KST: ${e.costCenter}</div>
+                    </div>
+                    <div class="entry-stats-box">
+                        <div>
+                            <small style="color:var(--text-muted); display:block;">KM-Stand</small>
+                            <strong style="font-size:0.95rem; color:var(--dark);">${e.kmStart} km ➔ ${e.kmEnd} km</strong>
+                        </div>
+                        <div style="text-align:right;">
+                            <small style="color:var(--text-muted); display:block;">Gefahren</small>
+                            <span class="entry-km-highlight">+${e.diff} km</span>
+                        </div>
+                    </div>
+                    ${fuelInfo}
+                    ${remarkInfo}
+                </div>
+            </div>`;
         });
-        document.getElementById('currentTable').innerHTML = h + "</table>";
+        
+        html += `</div>`;
+        document.getElementById('currentTable').innerHTML = html;
     }
 
     /* --- HELPERS --- */
