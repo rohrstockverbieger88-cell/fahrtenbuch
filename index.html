@@ -554,6 +554,13 @@
                 localStorage.setItem('fb_2026_hybrid', JSON.stringify(state));
                 saveToFirebaseSilently();
             }
+
+            // Auto-Clean: Falls in vorhandenen Daten noch 'System' als Vorname steht, bereinigen:
+            state.users.forEach(u => {
+                if (u.email === 'admin' && u.fname === 'System') {
+                    u.fname = 'Admin'; u.lname = '';
+                }
+            });
             
             // Lokales Backup bei jedem Online-Sync
             localStorage.setItem('fb_2026_hybrid', JSON.stringify(state));
@@ -564,6 +571,7 @@
         
         // UI aktualisieren, falls eingeloggt
         if (currentUser) {
+            if (currentUser.email === 'admin' && currentUser.fname === 'System') currentUser.fname = 'Admin';
             checkNotifications(); 
             if (!document.getElementById('viewDash').classList.contains('hidden')) renderCars();
             if (!document.getElementById('viewDetail').classList.contains('hidden') && activeCar) {
@@ -604,14 +612,29 @@
             } else {
                 adminUser.pass = 'admin';
                 adminUser.isAdmin = true;
+                adminUser.fname = 'Admin';
+                adminUser.lname = '';
                 save();
             }
         }
 
         const user = state.users.find(x => x.email === u && x.pass === p);
-        if(user) { currentUser = user; startSession(); } else alert("Email oder Passwort falsch!");
+        if(user) { 
+            currentUser = user; 
+            if(currentUser.email === 'admin' && currentUser.fname === 'System') currentUser.fname = 'Admin';
+            startSession(); 
+        } else alert("Email oder Passwort falsch!");
     }
-    function startSession() { document.getElementById('viewLogin').classList.add('hidden'); document.getElementById('mainHeader').classList.remove('hidden'); document.getElementById('viewDash').classList.remove('hidden'); document.getElementById('userDisplay').innerText = currentUser.fname; if(currentUser.isAdmin) document.getElementById('adminMenuItems').classList.remove('hidden'); checkNotifications(); renderCars(); }
+    function startSession() { 
+        if(currentUser && currentUser.email === 'admin' && currentUser.fname === 'System') currentUser.fname = 'Admin';
+        document.getElementById('viewLogin').classList.add('hidden'); 
+        document.getElementById('mainHeader').classList.remove('hidden'); 
+        document.getElementById('viewDash').classList.remove('hidden'); 
+        document.getElementById('userDisplay').innerText = (currentUser.fname === 'System' ? 'Admin' : currentUser.fname); 
+        if(currentUser.isAdmin) document.getElementById('adminMenuItems').classList.remove('hidden'); 
+        checkNotifications(); 
+        renderCars(); 
+    }
 
     function getPreviousMonth() { let d = new Date(); d.setMonth(d.getMonth() - 1); return d.toISOString().slice(0,7); }
     function checkNotifications() {
