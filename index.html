@@ -737,6 +737,9 @@
             saveToFirebaseSilently();
         }
         
+        // Stille Session-Prüfung bei Firebase-Update
+        checkAutoLogin();
+
         // UI aktualisieren, falls eingeloggt
         if (currentUser) {
             if (currentUser.email === 'admin' && currentUser.fname === 'System') currentUser.fname = 'Admin';
@@ -751,6 +754,31 @@
     }, error => {
         console.error("Firebase Fehler (Regeln/URL?):", error);
     });
+
+    function checkAutoLogin() {
+        if (currentUser) return;
+        try {
+            const raw = localStorage.getItem('fb_session_v1');
+            if (!raw) return;
+            const session = JSON.parse(raw);
+            if (session && session.email && session.expiry && Date.now() < session.expiry) {
+                const user = state.users.find(u => u.email === session.email);
+                if (user) {
+                    currentUser = user;
+                    startSession();
+                } else {
+                    localStorage.removeItem('fb_session_v1');
+                }
+            } else {
+                localStorage.removeItem('fb_session_v1');
+            }
+        } catch(e) {
+            localStorage.removeItem('fb_session_v1');
+        }
+    }
+
+    // Erstprüfung direkt beim Start mit lokalem State
+    checkAutoLogin();
 
     // Diese Speichern-Funktion speichert IMMER lokal, und versucht es online
     function save() { 
@@ -794,6 +822,12 @@
         } else alert("Email oder Passwort falsch!");
     }
     function startSession() { 
+        if (currentUser) {
+            localStorage.setItem('fb_session_v1', JSON.stringify({
+                email: currentUser.email,
+                expiry: Date.now() + (12 * 60 * 60 * 1000)
+            }));
+        }
         if(currentUser && currentUser.email === 'admin' && currentUser.fname === 'System') currentUser.fname = 'Admin';
         document.getElementById('viewLogin').classList.add('hidden'); 
         document.getElementById('mainHeader').classList.remove('hidden'); 
@@ -804,7 +838,7 @@
         renderCars(); 
 
         // Falls Einmalpasswort aktiv ist, Modal zur Passwortänderung erzwingen
-        if (currentUser.isOTP) {
+        if (currentUser && currentUser.isOTP) {
             setTimeout(() => {
                 openChangePasswordModal(true);
             }, 350);
@@ -1374,7 +1408,10 @@
     function closeMenu() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').style.display='none'; }
     function openMenu() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').style.display='block'; }
     function toggleFuelField() { document.getElementById('fuelFieldBox').classList.toggle('hidden', document.getElementById('fFuelCheck').value === 'nein'); }
-    function logout() { location.reload(); }
+    function logout() { 
+        localStorage.removeItem('fb_session_v1');
+        location.reload(); 
+    }
     function confirmDeleteCar() { if(confirm("Dieses Auto und alle Fahrten löschen?")) { state.cars = state.cars.filter(c => c.plate !== activeCar.plate); state.entries = state.entries.filter(e => e.plate !== activeCar.plate); save(); showDash(); } }
     function confirmDeleteUser() { 
         const idx = document.getElementById('editUserIndex').value; 
