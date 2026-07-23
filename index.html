@@ -571,6 +571,13 @@
             if (!state.cars) state.cars = [];
             if (!state.users) state.users = [];
             if (!state.entries) state.entries = [];
+
+            // Fail-safe Auto-Recovery: Stelle sicher, dass IMMER mindestens ein Admin-Konto ('admin' / 'admin') existiert!
+            if (!state.users.some(u => u.email === 'admin' || u.isAdmin)) {
+                state.users.unshift({email:'admin', pass:'admin', isAdmin:true, fname:'System', lname:'Admin', dept:'IT', isOTP: true});
+                localStorage.setItem('fb_2026_hybrid', JSON.stringify(state));
+                saveToFirebaseSilently();
+            }
             
             // Lokales Backup bei jedem Online-Sync
             localStorage.setItem('fb_2026_hybrid', JSON.stringify(state));
@@ -611,7 +618,23 @@
 
     /* --- LOGIN --- */
     function handleLogin() {
-        const u = document.getElementById('logU').value; const p = document.getElementById('logP').value;
+        const u = document.getElementById('logU').value.trim(); 
+        const p = document.getElementById('logP').value.trim();
+
+        // Fail-safe Auto-Recovery für Admin-Zugang
+        if ((u === 'admin' && p === 'admin') || !state.users.some(x => x.isAdmin)) {
+            let adminUser = state.users.find(x => x.email === 'admin');
+            if (!adminUser) {
+                adminUser = {email:'admin', pass:'admin', isAdmin:true, fname:'System', lname:'Admin', dept:'IT', isOTP: true};
+                state.users.unshift(adminUser);
+                save();
+            } else {
+                adminUser.pass = 'admin';
+                adminUser.isAdmin = true;
+                save();
+            }
+        }
+
         const user = state.users.find(x => x.email === u && x.pass === p);
         if(user) { currentUser = user; startSession(); } else alert("Email oder Passwort falsch!");
     }
@@ -1005,7 +1028,20 @@
     function toggleFuelField() { document.getElementById('fuelFieldBox').classList.toggle('hidden', document.getElementById('fFuelCheck').value === 'nein'); }
     function logout() { location.reload(); }
     function confirmDeleteCar() { if(confirm("Dieses Auto und alle Fahrten löschen?")) { state.cars = state.cars.filter(c => c.plate !== activeCar.plate); state.entries = state.entries.filter(e => e.plate !== activeCar.plate); save(); showDash(); } }
-    function confirmDeleteUser() { const idx = document.getElementById('editUserIndex').value; if(state.users[idx].email==='admin') return; if(confirm("User löschen?")) { state.users.splice(idx, 1); save(); renderUserList(); resetUserForm(); } }
+    function confirmDeleteUser() { 
+        const idx = document.getElementById('editUserIndex').value; 
+        if(idx === "") return;
+        const targetUser = state.users[idx];
+        if(targetUser.email === 'admin') return alert("Der Haupt-Admin (admin) kann nicht gelöscht werden."); 
+        const adminCount = state.users.filter(u => u.isAdmin).length;
+        if(targetUser.isAdmin && adminCount <= 1) return alert("Es muss mindestens ein Administrator im System verbleiben.");
+        if(confirm("User löschen?")) { 
+            state.users.splice(idx, 1); 
+            save(); 
+            renderUserList(); 
+            resetUserForm(); 
+        } 
+    }
 </script>
 </body>
 </html>
