@@ -365,6 +365,7 @@
             <div class="menu-item" onclick="openUserModal()">👥 User & Rechte</div>
             <div class="menu-item" onclick="openExportModal()">📊 Excel-Fahrten Export</div>
         </div>
+        <div class="menu-item" onclick="openChangePasswordModal()">🔑 Passwort ändern</div>
         <hr>
         <div class="menu-item" onclick="logout()" style="color: #f87171; margin-top: 2rem;">🚪 Abmelden</div>
     </div>
@@ -477,6 +478,22 @@
             </div>
             <div id="userListContainer" style="max-height: 300px; overflow-y: auto;"></div>
             <button class="btn-s" style="width:100%; margin-top:15px" onclick="closeModals()">Schließen</button>
+        </div>
+    </div>
+
+    <!-- Modal: Passwort ändern (auch für Einmalpasswort / OTP) -->
+    <div id="modalChangePassword" class="modal hidden">
+        <div class="modal-content" style="max-width: 420px;">
+            <h3>🔑 Passwort ändern</h3>
+            <p id="changePassNotice" style="font-size: 0.9rem; color: #64748b; margin-bottom: 15px; line-height: 1.4;">Hier kannst du dein persönliches Passwort festlegen.</p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <input type="password" id="cpNew" placeholder="Neues Passwort*">
+                <input type="password" id="cpConfirm" placeholder="Neues Passwort wiederholen*">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button id="cpCancelBtn" class="btn-s" style="flex:1" onclick="closeModals()">Abbrechen</button>
+                <button class="btn-p" style="flex:1" onclick="submitPasswordChange()">Speichern</button>
+            </div>
         </div>
     </div>
 
@@ -634,6 +651,49 @@
         if(currentUser.isAdmin) document.getElementById('adminMenuItems').classList.remove('hidden'); 
         checkNotifications(); 
         renderCars(); 
+
+        // Falls Einmalpasswort aktiv ist, Modal zur Passwortänderung erzwingen
+        if (currentUser.isOTP) {
+            setTimeout(() => {
+                openChangePasswordModal(true);
+            }, 350);
+        }
+    }
+
+    function openChangePasswordModal(isForcedOTP = false) {
+        closeMenu();
+        document.getElementById('cpNew').value = '';
+        document.getElementById('cpConfirm').value = '';
+        const notice = document.getElementById('changePassNotice');
+        const cancelBtn = document.getElementById('cpCancelBtn');
+        
+        if (isForcedOTP) {
+            notice.innerHTML = "<strong style='color:#ef4444;'>⚠️ Du hast dich mit einem Einmalpasswort angemeldet.</strong><br>Bitte vergib jetzt dein eigenes, neues Passwort:";
+            cancelBtn.classList.add('hidden');
+        } else {
+            notice.innerHTML = "Hier kannst du dein persönliches Passwort festlegen:";
+            cancelBtn.classList.remove('hidden');
+        }
+        document.getElementById('modalChangePassword').classList.remove('hidden');
+    }
+
+    function submitPasswordChange() {
+        const p1 = document.getElementById('cpNew').value.trim();
+        const p2 = document.getElementById('cpConfirm').value.trim();
+        if (!p1) return alert("Bitte gib ein neues Passwort ein!");
+        if (p1 !== p2) return alert("Die Passwörter stimmen nicht überein!");
+        
+        currentUser.pass = p1;
+        currentUser.isOTP = false;
+        
+        const idx = state.users.findIndex(u => u.email === currentUser.email);
+        if (idx !== -1) {
+            state.users[idx].pass = p1;
+            state.users[idx].isOTP = false;
+        }
+        save();
+        closeModals();
+        alert("Dein Passwort wurde erfolgreich geändert!");
     }
 
     function getPreviousMonth() { let d = new Date(); d.setMonth(d.getMonth() - 1); return d.toISOString().slice(0,7); }
@@ -746,11 +806,39 @@
     }
     function saveUser() {
         const idx = document.getElementById('editUserIndex').value;
-        const email = document.getElementById('uEmail').value;
-        const passIn = document.getElementById('uO').value;
-        const data = { email, fname: document.getElementById('uF').value, lname: document.getElementById('uL').value, dept: document.getElementById('uD').value, pass: passIn || (idx!==""?state.users[idx].pass:"1234"), isAdmin: (email==='admin'?true:document.getElementById('uAdmin').checked), isOTP: !!passIn };
-        if(idx!=="") state.users[idx] = data; else state.users.push(data);
-        save(); renderUserList(); resetUserForm();
+        const email = document.getElementById('uEmail').value.trim();
+        if(!email) return alert("Bitte E-Mail angeben!");
+        const passIn = document.getElementById('uO').value.trim();
+        
+        let newPass = "";
+        let isOTP = false;
+        
+        if (passIn) {
+            // Admin hat explizit ein Passwort eingegeben -> Es ist ein Einmalpasswort!
+            newPass = passIn;
+            isOTP = true;
+        } else if (idx === "") {
+            // Neuer User ohne Passwort-Eingabe -> Standard-Einmalpasswort '1234'
+            newPass = "1234";
+            isOTP = true;
+        } else {
+            // Bestehender User ohne neue Passwort-Eingabe -> Passwort & OTP Status beibehalten
+            newPass = state.users[idx].pass;
+            isOTP = !!state.users[idx].isOTP;
+        }
+
+        const data = { 
+            email, 
+            fname: document.getElementById('uF').value.trim(), 
+            lname: document.getElementById('uL').value.trim(), 
+            dept: document.getElementById('uD').value.trim(), 
+            pass: newPass, 
+            isAdmin: (email === 'admin' ? true : document.getElementById('uAdmin').checked), 
+            isOTP: isOTP 
+        };
+        
+        if(idx !== "") state.users[idx] = data; else state.users.push(data);
+        save(); renderUserList(); resetUserForm(); alert("Benutzer gespeichert.");
     }
     function resetUserForm() { document.getElementById('editUserIndex').value = ""; document.querySelectorAll('#modalUser input').forEach(i => i.value = ''); }
 
@@ -1013,7 +1101,37 @@
     function openCar(car) { activeCar = car; document.getElementById('viewDash').classList.add('hidden'); document.getElementById('viewDetail').classList.remove('hidden'); document.getElementById('detPlateText').innerText = car.plate; document.getElementById('detSub').innerText = car.brand + " " + car.model; const resp = state.users.find(u => u.email === car.responsibleEmail); document.getElementById('detResp').innerText = resp ? `Verantwortlich: ${resp.fname} ${resp.lname}` : ''; if(currentUser.isAdmin) document.getElementById('adminEditCarBtn').classList.remove('hidden'); renderEntries(); }
     function populateRespSelect() { const s = document.getElementById('cRespSelect'); s.innerHTML = '<option value="">-- Keiner --</option>'; state.users.forEach(u => { s.innerHTML += `<option value="${u.email}">${u.fname} ${u.lname}</option>`; }); }
     function exportUsersCSV() { let csv = "\uFEFFEmail;Vorname;Nachname;Abteilung;Einmalpasswort;Administrator\n"; state.users.forEach(u => { if(u.email==='admin')return; csv += `${u.email};${u.fname};${u.lname};${u.dept};alt;${u.isAdmin?'Ja':'Nein'}\n`; }); downloadFile(csv, "User.csv"); }
-    function importUsersCSV(event) { const f = event.target.files[0]; const r = new FileReader(); r.onload = function(e) { const lines = e.target.result.split(/\r?\n/); for(let i=1; i<lines.length; i++){ const c = lines[i].split(';'); if(c.length<5)continue; let email=c[0].trim(); if(email==='admin')continue; let idx=state.users.findIndex(u=>u.email===email); const d={email, fname:c[1].trim(), lname:c[2].trim(), dept:c[3].trim(), isAdmin:c[5].trim().toLowerCase()==='ja', isOTP:c[4].trim()!=='alt'}; d.pass=(c[4].trim()==='alt'&&idx!==-1)?state.users[idx].pass:c[4].trim(); if(idx!==-1)state.users[idx]=d; else state.users.push(d); } save(); renderUserList(); alert("Import fertig."); }; r.readAsText(f); }
+    function importUsersCSV(event) { 
+        const f = event.target.files[0]; 
+        const r = new FileReader(); 
+        r.onload = function(e) { 
+            const lines = e.target.result.split(/\r?\n/); 
+            for(let i=1; i<lines.length; i++){ 
+                const c = lines[i].split(';'); 
+                if(c.length<5)continue; 
+                let email=c[0].trim(); 
+                if(email==='admin')continue; 
+                let idx=state.users.findIndex(u=>u.email===email); 
+                const passVal = c[4] ? c[4].trim() : '';
+                const d={
+                    email, 
+                    fname:c[1].trim(), 
+                    lname:c[2].trim(), 
+                    dept:c[3].trim(), 
+                    isAdmin: (c[5] && c[5].trim().toLowerCase()==='ja'), 
+                    isOTP: passVal !== 'alt'
+                }; 
+                if (passVal === 'alt' && idx !== -1) {
+                    d.pass = state.users[idx].pass;
+                } else {
+                    d.pass = passVal || '1234'; // Falls leer, wird automatisch '1234' als Einmalpasswort vergeben
+                }
+                if(idx!==-1) state.users[idx]=d; else state.users.push(d); 
+            } 
+            save(); renderUserList(); alert("Import fertig."); 
+        }; 
+        r.readAsText(f); 
+    }
     function exportCarsCSV() { let csv = "\uFEFFKennzeichen;Marke;Modell;Kraftstoff;Startkilometer;Datum;Verantwortlicher\n"; state.cars.forEach(c => { const u = state.users.find(x => x.email === c.responsibleEmail); csv += `${c.plate};${c.brand};${c.model};${c.fuel};${c.startKm};${c.startDate};${u?u.fname+' '+u.lname:''}\n`; }); downloadFile(csv, "Fuhrpark.csv"); }
     function importCarsCSV(event) { const f = event.target.files[0]; const r = new FileReader(); r.onload = function(e) { const lines = e.target.result.split(/\r?\n/); for(let i=1; i<lines.length; i++){ const c = lines[i].split(';'); if(c.length<5)continue; const p=c[0].trim(); const user=state.users.find(u=>`${u.fname} ${u.lname}`.toLowerCase()===(c[6]||"").trim().toLowerCase()); const car={plate:p, brand:c[1].trim(), model:c[2].trim(), fuel:c[3].trim(), startKm:parseInt(c[4].trim()), startDate:c[5]?c[5].trim():"", responsibleEmail:user?user.email:""}; let idx=state.cars.findIndex(x=>x.plate===p); if(idx!==-1)state.cars[idx]=car; else state.cars.push(car); } save(); renderCars(); alert("Import fertig."); }; r.readAsText(f); }
     function downloadFile(c, n) { const b = new Blob([c], {type:'text/csv;charset=utf-8;'}); const l = document.createElement("a"); l.href = URL.createObjectURL(b); l.download = n; l.click(); }
