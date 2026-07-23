@@ -539,7 +539,31 @@
 
     let currentUser = null; let activeCar = null; let activeFilter = { type: 'month', value: new Date().toISOString().slice(0,7) };
 
-    // 2. Höre auf die Datenbank
+    // 2. Höre auf die Datenbank-Verbindung
+    const syncBadge = document.createElement('div');
+    syncBadge.id = "cloudSyncStatus";
+    syncBadge.style.cssText = "font-size:0.75rem; font-weight:600; padding:4px 10px; border-radius:20px; display:inline-flex; align-items:center; gap:5px; background:#f1f5f9; color:#64748b;";
+    syncBadge.innerHTML = "🟡 Verbinde mit Cloud...";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const hRight = document.getElementById('userDisplay');
+        if(hRight && hRight.parentNode) {
+            hRight.parentNode.insertBefore(syncBadge, hRight);
+        }
+    });
+
+    fbDb.ref('.info/connected').on('value', snap => {
+        if (snap.val() === true) {
+            syncBadge.style.background = "#ecfdf5";
+            syncBadge.style.color = "#10b981";
+            syncBadge.innerHTML = "🟢 Cloud Live";
+        } else {
+            syncBadge.style.background = "#fef2f2";
+            syncBadge.style.color = "#ef4444";
+            syncBadge.innerHTML = "🔴 Offline (Lokal)";
+        }
+    });
+
     fbDb.ref('fBuchState').on('value', snap => {
         if(snap.exists() && snap.val()) {
             state = snap.val();
@@ -567,6 +591,9 @@
         }
     }, error => {
         console.error("Firebase Fehler (Regeln/URL?):", error);
+        syncBadge.style.background = "#fef2f2";
+        syncBadge.style.color = "#ef4444";
+        syncBadge.innerHTML = "⚠️ DB-Sperre (Regeln prüfen)";
     });
 
     // Diese Speichern-Funktion speichert IMMER lokal, und versucht es online
@@ -578,6 +605,7 @@
     function saveToFirebaseSilently() {
         fbDb.ref('fBuchState').set(state).catch(e => {
             console.error("Daten wurden nur lokal gespeichert. Firebase Fehler: " + e.message);
+            alert("⚠️ Achtung: Daten wurden nur lokal gespeichert!\n\nGrund: " + e.message + "\n\nBitte prüfe die Firebase-Regeln in deiner Konsole.");
         });
     }
 
