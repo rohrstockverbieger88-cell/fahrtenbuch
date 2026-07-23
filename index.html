@@ -22,34 +22,66 @@
             --dark-surface: #1e293b;
             --light: #f8fafc; 
             --card-bg: #ffffff;
-            --border: #e2e8f0;
+            --border: #cbd5e1;
+            --border-subtle: #e2e8f0;
             --danger: #ef4444; 
             --success: #10b981; 
             --warning: #f59e0b; 
-            --text: #1e293b;
+            --text: #0f172a;
             --text-muted: #64748b;
             --radius-lg: 16px;
             --radius-md: 12px;
             --radius-sm: 8px;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
             --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
-            --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.04);
+            --shadow-lg: 0 20px 30px -10px rgba(15, 23, 42, 0.15), 0 8px 10px -6px rgba(15, 23, 42, 0.05);
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        body { 
+        html, body { 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
             background: #f1f5f9; 
             margin: 0; 
+            padding: 0;
             color: var(--text); 
-            overflow-x: hidden;
             width: 100%;
             min-height: 100vh;
             line-height: 1.5;
         }
 
+        body.modal-open {
+            overflow: hidden !important;
+            touch-action: none;
+        }
+
         .hidden { display: none !important; }
+
+        /* Form Grids for Responsive Modals */
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
 
         /* Modernized Header */
         header { 
@@ -60,21 +92,21 @@
             display: flex; 
             align-items: center; 
             justify-content: space-between; 
-            box-shadow: 0 1px 4px rgba(0,0,0,0.08); 
+            box-shadow: 0 2px 10px rgba(15,23,42,0.06); 
             position: sticky; 
             top: 0; 
             z-index: 100; 
-            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            border-bottom: 1px solid var(--border-subtle);
         }
         .header-brand { display: flex; align-items: center; gap: 12px; }
         .burger-btn { 
-            font-size: 1.5rem; 
+            font-size: 1.4rem; 
             cursor: pointer; 
-            background: #f1f5f9; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 10px;
-            width: 42px;
-            height: 42px;
+            background: #f8fafc; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 12px;
+            width: 44px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -87,11 +119,11 @@
         .sidebar { 
             position: fixed; top: 0; left: -320px; width: 300px; height: 100%; 
             background: var(--dark); color: white; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-            z-index: 400; padding: 2rem 1.25rem; box-shadow: 10px 0 25px rgba(0,0,0,0.3);
+            z-index: 2000; padding: 2rem 1.25rem; box-shadow: 10px 0 25px rgba(0,0,0,0.3);
             display: flex; flex-direction: column;
         }
         .sidebar.open { transform: translateX(320px); }
-        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; z-index: 350; }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; z-index: 1900; }
         .sidebar h2 { font-size: 1.4rem; font-weight: 700; margin-top: 0; margin-bottom: 1.5rem; color: #f8fafc; letter-spacing: -0.02em; }
         .menu-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; color: #94a3b8; text-decoration: none; border-radius: var(--radius-md); margin-bottom: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
         .menu-item:hover, .menu-item:active { background: var(--dark-surface); color: white; transform: translateX(3px); }
@@ -101,21 +133,21 @@
 
         /* License Plate Styling */
         .license-plate {
-            background: #ffffff; border: 2.5 solid #1e293b; border-radius: 8px;
+            background: #ffffff; border: 2px solid #0f172a; border-radius: 8px;
             display: inline-flex; align-items: center; font-family: 'Arial Black', sans-serif;
-            color: #0f172a; padding: 0; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.12);
-            height: 42px; min-width: 190px; border: 2px solid #1e293b;
+            color: #0f172a; padding: 0; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            height: 44px; min-width: 190px;
         }
-        .plate-eu { background: #003399; color: white; width: 26px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 9px; font-weight: bold; line-height: 1; padding: 2px; }
+        .plate-eu { background: #003399; color: white; width: 28px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 10px; font-weight: bold; line-height: 1; padding: 2px; }
         .plate-text { padding: 0 14px; font-size: 1.35rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 900; }
 
         /* Car Grid / Kacheln */
-        .car-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+        .car-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.25rem; }
         .car-card { 
             background: var(--card-bg); 
-            border: 1px solid var(--border); 
+            border: 1px solid var(--border-subtle); 
             border-radius: var(--radius-lg); 
-            padding: 1.25rem; 
+            padding: 1.35rem; 
             text-align: left; 
             cursor: pointer; 
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
@@ -125,8 +157,42 @@
         }
         .car-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
         .car-card:active { transform: scale(0.98); }
+        .car-card.fav-card {
+            border: 2px solid #f59e0b;
+            background: linear-gradient(135deg, #ffffff 0%, #fffdf0 100%);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+        }
         .car-card p { font-size: 1.1rem; font-weight: 700; margin: 0.75rem 0 0.5rem 0; color: var(--dark); }
         .resp-info { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 6px; }
+
+        /* Favorite Button & Star Styling */
+        .fav-star-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            font-size: 1.25rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 6px 10px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            color: #94a3b8;
+            min-height: auto !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .fav-star-btn:hover {
+            transform: scale(1.12);
+            background: #fffbeb;
+            border-color: #fde047;
+        }
+        .fav-star-btn.is-fav {
+            color: #f59e0b;
+            background: #fef3c7;
+            border-color: #f59e0b;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
+        }
 
         /* Modern Mobile-Optimized Entry Tiles / Mobile Kacheln */
         .entries-container { margin-top: 1.25rem; }
@@ -134,9 +200,9 @@
         
         .entry-tile {
             background: var(--card-bg);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-subtle);
             border-radius: var(--radius-lg);
-            padding: 1.15rem;
+            padding: 1.25rem;
             box-shadow: var(--shadow-sm);
             transition: all 0.2s ease;
             position: relative;
@@ -158,7 +224,7 @@
             color: var(--primary);
             font-weight: 700;
             font-size: 0.9rem;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 20px;
             display: inline-flex;
             align-items: center;
@@ -175,7 +241,7 @@
             gap: 0.6rem;
         }
         .entry-route {
-            font-size: 1rem;
+            font-size: 1.05rem;
             font-weight: 700;
             color: var(--dark);
             display: flex;
@@ -249,83 +315,97 @@
             border-radius: var(--radius-lg);
             align-items: center;
             box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-subtle);
         }
         .filter-bar input[type="date"] {
             width: auto;
             margin: 0;
-            padding: 6px 10px;
-            font-size: 0.85rem;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            min-height: 42px;
         }
 
-        /* Modals & Dialogs */
+        /* Modals & Dialogs - Casa Björola Glassmorphism Overlay */
         .modal { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(15, 23, 42, 0.7); 
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            display: flex; align-items: center; justify-content: center; 
-            z-index: 500; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            right: 0;
+            bottom: 0;
+            width: 100vw; 
+            height: 100vh; 
+            background: rgba(15, 23, 42, 0.75); 
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 1000; 
             padding: 1rem;
+            box-sizing: border-box;
+            overflow-y: auto;
         }
         .modal-content { 
             background: var(--card-bg); 
             padding: 1.75rem; 
             border-radius: var(--radius-lg); 
             width: 100%; 
-            max-width: 550px; 
+            max-width: 540px; 
             max-height: 90vh; 
             overflow-y: auto; 
             position: relative; 
             box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-subtle);
             animation: modalSlideUp 0.25s ease-out;
+            margin: auto;
         }
         @keyframes modalSlideUp {
-            from { opacity: 0; transform: translateY(15px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Inputs & Controls - Optimized for Touch (Mobile) */
+        /* Inputs & Controls - Optimized for Touch (Mobile 16px Font Size!) */
         input, select, textarea { 
             width: 100%; 
-            padding: 12px 14px; 
-            margin: 6px 0 12px 0; 
-            border: 1.5px solid var(--border); 
-            border-radius: var(--radius-md); 
+            padding: 12px 16px; 
+            margin: 4px 0 10px 0; 
+            border: 1.5px solid #cbd5e1; 
+            border-radius: 12px; 
             box-sizing: border-box; 
-            font-size: 1rem; 
+            font-size: 16px !important; /* Forces iOS to NOT zoom in when tapped */
             font-family: inherit;
             background: #ffffff;
             color: var(--text);
-            transition: all 0.2s; 
-            min-height: 46px;
+            transition: all 0.2s ease; 
+            min-height: 50px;
         }
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.15);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+            background-color: #ffffff;
         }
-        .field-error { border: 2px solid var(--danger) !important; background-color: #fef2f2; }
+        .field-error { border: 2px solid var(--danger) !important; background-color: #fef2f2 !important; }
 
         /* Buttons Touch Target Friendly */
         button { 
             padding: 12px 20px; 
-            border-radius: var(--radius-md); 
+            border-radius: 12px; 
             border: none; 
             cursor: pointer; 
             font-weight: 600; 
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-family: inherit;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            min-height: 44px;
+            min-height: 48px;
+            touch-action: manipulation;
         }
         button:active { transform: scale(0.97); }
-        .btn-p { background: var(--primary); color: white; box-shadow: 0 2px 4px rgba(37,99,235,0.2); }
+        .btn-p { background: var(--primary); color: white; box-shadow: 0 3px 8px rgba(37,99,235,0.25); }
         .btn-p:hover { background: var(--primary-dark); }
         .btn-s { background: #f1f5f9; color: var(--dark); border: 1px solid #cbd5e1; }
         .btn-s:hover { background: #e2e8f0; }
@@ -333,7 +413,7 @@
         .btn-w { background: var(--warning); color: white; }
 
         .user-card { 
-            background: #fff; border: 1px solid var(--border); padding: 14px; 
+            background: #fff; border: 1px solid var(--border-subtle); padding: 14px; 
             margin-bottom: 10px; border-radius: var(--radius-md); 
             display: flex; justify-content: space-between; align-items: center; 
             box-shadow: var(--shadow-sm); 
@@ -344,8 +424,18 @@
             header h2 { font-size: 1rem !important; }
             #siteLogo { height: 40px !important; margin-left: 8px !important; }
             .container { padding: 0 0.75rem; margin: 0.75rem auto; }
-            .modal-content { padding: 1.25rem; border-radius: var(--radius-lg); }
+            .modal { padding: 0.5rem; align-items: flex-end; }
+            .modal-content { 
+                padding: 1.25rem; 
+                border-bottom-left-radius: 0; 
+                border-bottom-right-radius: 0; 
+                border-top-left-radius: 24px; 
+                border-top-right-radius: 24px; 
+                max-height: 88vh; 
+            }
             .car-grid { grid-template-columns: 1fr; }
+            .form-grid-2 { grid-template-columns: 1fr; gap: 6px; }
+            .form-grid-3 { grid-template-columns: 1fr; gap: 6px; }
             .filter-bar { flex-direction: column; align-items: stretch; }
             .filter-bar button, .filter-bar input { width: 100%; }
             .detail-header-row { flex-direction: column; align-items: flex-start !important; gap: 12px; }
@@ -403,17 +493,27 @@
 
         <div id="viewDetail" class="hidden">
             <button class="btn-s" onclick="showDash()">← Übersicht</button>
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 15px; flex-wrap: wrap; gap: 12px;">
                 <div>
-                    <div class="license-plate"><div class="plate-eu"><span>D</span></div><div class="plate-text" id="detPlateText"></div></div>
-                    <p id="detSub" style="color: #64748b; margin-top: 5px;"></p>
-                    <p id="detResp" style="font-size: 0.9rem; color: var(--primary); font-weight: bold;"></p>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="license-plate"><div class="plate-eu"><span>D</span></div><div class="plate-text" id="detPlateText"></div></div>
+                        <button id="detFavBtn" class="fav-star-btn" onclick="toggleFavorite(activeCar ? activeCar.plate : '', event)" title="Favorit umschalten">☆</button>
+                    </div>
+                    <p id="detSub" style="color: #64748b; margin-top: 6px; font-weight:600;"></p>
+                    <p id="detResp" style="font-size: 0.9rem; color: var(--primary); font-weight: bold; margin-top: 2px;"></p>
                 </div>
-                <div style="display: flex; gap: 10px; align-items: center;">
+                <div style="display: flex; gap: 8px; align-items: center;">
                     <button class="btn-s" onclick="generatePDF()"><span style="color:var(--danger)">📄</span> PDF Logbuch</button>
                     <button id="adminEditCarBtn" class="btn-s hidden" onclick="openEditCarModal()">⚙️ Stammdaten</button>
                 </div>
             </div>
+
+            <!-- PROMINENTER HERO-BUTTON: HIER ALS ERSTES NEUE FAHRT HINZUFÜGEN! -->
+            <button class="btn-p" style="width: 100%; padding: 15px 20px; font-size: 1.1rem; font-weight: 700; border-radius: 14px; margin-top: 16px; margin-bottom: 20px; box-shadow: 0 4px 14px rgba(37,99,235,0.3); display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="openEntryModal()">
+                ✏️ Neue Fahrt hinzufügen
+            </button>
+
+            <!-- FAHRTEN HISTORIE & FILTER -->
             <div id="filterControls" class="filter-bar">
                 <button class="btn-s" onclick="setFilter('current')">Aktueller Monat</button>
                 <button class="btn-s" onclick="setFilter('prev')">Letzter Monat</button>
@@ -424,7 +524,6 @@
             </div>
             <div id="controlBtnContainer" style="margin-top: 10px;"></div>
             <div id="currentTableContainer" style="margin-top:20px; overflow-x: auto; background: white; border-radius: 12px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><div id="currentTable"></div></div>
-            <button class="btn-p" style="margin-top:20px" onclick="openEntryModal()">+ Fahrt hinzufügen</button>
         </div>
     </div>
 
@@ -498,34 +597,86 @@
     </div>
 
     <div id="modalEntry" class="modal hidden">
-        <div class="modal-content" style="max-width: 500px;">
-            <h3 id="modalEntryTitle">Neue Fahrt erfassen</h3>
+        <div class="modal-content" style="max-width: 520px;">
+            <h3 id="modalEntryTitle" style="margin-top:0; font-size: 1.25rem; font-weight:700; color:var(--dark);">✏️ Neue Fahrt erfassen</h3>
             <input type="hidden" id="editEntryUid">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div><label><small>Datum:*</small></label><input type="date" id="fDate" onclick="this.showPicker()"></div>
-                <div><label><small>Fahrer:*</small></label><input type="text" id="fDriver" readonly style="background: #f1f5f9;"></div>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div><label><small>Startzeit:*</small></label><input type="time" id="fTimeStart" onclick="this.showPicker()"></div>
-                <div><label><small>Endzeit:*</small></label><input type="time" id="fTimeEnd" onclick="this.showPicker()"></div>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div><label><small>Start-KM:*</small></label><input type="number" id="fKmStart" readonly style="background: #f1f5f9;"></div>
-                <div><label><small>End-KM:*</small></label><input type="number" id="fKmEnd" placeholder="End-KM"></div>
-            </div>
-            <label><small>Fahrziel:*</small></label><input type="text" id="fDestination" placeholder="Zielort">
-            <label><small>Kostenstelle:*</small></label><input type="text" id="fCostCenter" placeholder="Projektnummer" onfocus="suggestLastCostCenter()">
-            <label><small>Bemerkung (optional):</small></label><textarea id="fComment" rows="2"></textarea>
-            <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 10px; border-radius: 8px; margin-top: 10px;">
-                <label><small>Wurde getankt?</small></label>
-                <select id="fFuelCheck" onchange="toggleFuelField()"><option value="nein">Nein</option><option value="ja">Ja</option></select>
-                <div id="fuelFieldBox" class="hidden" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 5px;">
-                    <div><label><small>KM beim Tanken:*</small></label><input type="number" id="fFuelKm"></div>
-                    <div><label><small>Liter:*</small></label><input type="number" step="0.01" id="fFuelLiters"></div>
-                    <div><label><small>Preis (€):*</small></label><input type="number" step="0.01" id="fFuelPrice"></div>
+            
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label>📅 Datum:*</label>
+                    <input type="date" id="fDate" onclick="this.showPicker()">
+                </div>
+                <div class="form-group">
+                    <label>👤 Fahrer:*</label>
+                    <input type="text" id="fDriver" readonly style="background: #f1f5f9; cursor: not-allowed;">
                 </div>
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;"><button class="btn-s" style="flex:1" onclick="closeModals()">Abbrechen</button><button class="btn-p" style="flex:2" onclick="submitEntry()">Speichern</button></div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label>🕒 Startzeit:*</label>
+                    <input type="time" id="fTimeStart" onclick="this.showPicker()">
+                </div>
+                <div class="form-group">
+                    <label>🕒 Endzeit:*</label>
+                    <input type="time" id="fTimeEnd" onclick="this.showPicker()">
+                </div>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label>🏁 Start-KM:*</label>
+                    <input type="number" id="fKmStart" readonly style="background: #f1f5f9; cursor: not-allowed;">
+                </div>
+                <div class="form-group">
+                    <label>🏁 End-KM:*</label>
+                    <input type="number" id="fKmEnd" placeholder="z.B. 45350">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>📍 Fahrziel / Grund:*</label>
+                <input type="text" id="fDestination" placeholder="Zielort oder Grund der Fahrt">
+            </div>
+
+            <div class="form-group">
+                <label>🏷️ Kostenstelle / Projekt:*</label>
+                <input type="text" id="fCostCenter" placeholder="Projektnummer / Kostenstelle" onfocus="suggestLastCostCenter()">
+            </div>
+
+            <div class="form-group">
+                <label>📝 Bemerkung (optional):</label>
+                <textarea id="fComment" rows="2" placeholder="Zusatzangaben..."></textarea>
+            </div>
+
+            <div style="background: #fffbeb; border: 1.5px solid #fde68a; padding: 14px; border-radius: 12px; margin-top: 5px;">
+                <label style="font-weight:700; color:#b45309; display:block; margin-bottom: 6px;">⛽ Wurde getankt?</label>
+                <select id="fFuelCheck" onchange="toggleFuelField()" style="margin-bottom: 0;">
+                    <option value="nein">Nein</option>
+                    <option value="ja">Ja</option>
+                </select>
+                <div id="fuelFieldBox" class="hidden" style="margin-top: 10px;">
+                    <div class="form-grid-3">
+                        <div class="form-group">
+                            <label><small>KM beim Tanken:*</small></label>
+                            <input type="number" id="fFuelKm" placeholder="KM-Stand">
+                        </div>
+                        <div class="form-group">
+                            <label><small>Liter:*</small></label>
+                            <input type="number" step="0.01" id="fFuelLiters" placeholder="z.B. 45.50">
+                        </div>
+                        <div class="form-group">
+                            <label><small>Preis (€):*</small></label>
+                            <input type="number" step="0.01" id="fFuelPrice" placeholder="z.B. 78.90">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 20px;">
+                <button class="btn-s" style="flex:1" onclick="closeModals()">Abbrechen</button>
+                <button class="btn-p" style="flex:2" onclick="submitEntry()">💾 Speichern</button>
+            </div>
         </div>
     </div>
 
@@ -674,7 +825,7 @@
             notice.innerHTML = "Hier kannst du dein persönliches Passwort festlegen:";
             cancelBtn.classList.remove('hidden');
         }
-        document.getElementById('modalChangePassword').classList.remove('hidden');
+        openModal('modalChangePassword');
     }
 
     function submitPasswordChange() {
@@ -755,7 +906,7 @@
         document.getElementById('cDate').valueAsDate = new Date();
         document.getElementById('deleteCarBtn').classList.add('hidden');
         populateRespSelect();
-        document.getElementById('modalCar').classList.remove('hidden');
+        openModal('modalCar');
     }
 
     function openEditCarModal() {
@@ -768,7 +919,7 @@
         document.getElementById('cDate').value = activeCar.startDate || "";
         document.getElementById('cRespSelect').value = activeCar.responsibleEmail;
         document.getElementById('deleteCarBtn').classList.remove('hidden');
-        document.getElementById('modalCar').classList.remove('hidden');
+        openModal('modalCar');
     }
 
     function saveCar() {
@@ -789,7 +940,7 @@
     }
 
     /* --- USER MANAGEMENT --- */
-    function openUserModal() { closeMenu(); renderUserList(); document.getElementById('modalUser').classList.remove('hidden'); }
+    function openUserModal() { closeMenu(); renderUserList(); openModal('modalUser'); }
     function renderUserList() {
         const container = document.getElementById('userListContainer'); container.innerHTML = '';
         state.users.forEach((u, i) => {
@@ -856,7 +1007,7 @@
         document.getElementById('fTimeStart').value = ""; document.getElementById('fTimeEnd').value = "";
         document.getElementById('fComment').value = ""; document.getElementById('fFuelCheck').value = "nein"; toggleFuelField();
         document.getElementById('fFuelKm').value = ""; document.getElementById('fFuelLiters').value = ""; document.getElementById('fFuelPrice').value = "";
-        document.getElementById('modalEntry').classList.remove('hidden');
+        openModal('modalEntry');
     }
     function openEntryModalForEdit(uid) {
         const entry = state.entries.find(e => (e.uid === uid) || (e.timestamp.toString() === uid.toString()));
@@ -884,7 +1035,7 @@
             document.getElementById('fFuelLiters').value = entry.fuelLiters || "";
             document.getElementById('fFuelPrice').value = entry.fuelPrice || "";
         }
-        document.getElementById('modalEntry').classList.remove('hidden');
+        openModal('modalEntry');
     }
     function suggestLastCostCenter() {
         const f = document.getElementById('fCostCenter'); if(f.value !== "") return;
@@ -1095,10 +1246,86 @@
         document.getElementById('currentTable').innerHTML = html;
     }
 
+    /* --- FAVORITEN LOGIK --- */
+    function toggleFavorite(plate, event) {
+        if (event) event.stopPropagation();
+        if (!currentUser || !plate) return;
+        if (!currentUser.favorites) currentUser.favorites = [];
+        const idx = currentUser.favorites.indexOf(plate);
+        if (idx > -1) {
+            currentUser.favorites.splice(idx, 1);
+        } else {
+            currentUser.favorites.push(plate);
+        }
+        const userInState = state.users.find(u => u.email === currentUser.email);
+        if (userInState) userInState.favorites = currentUser.favorites;
+        save();
+        
+        if (!document.getElementById('viewDash').classList.contains('hidden')) renderCars();
+        if (!document.getElementById('viewDetail').classList.contains('hidden') && activeCar) updateDetailFavStar();
+    }
+
+    function updateDetailFavStar() {
+        if (!activeCar) return;
+        const btn = document.getElementById('detFavBtn');
+        if (!btn) return;
+        const favs = (currentUser && currentUser.favorites) ? currentUser.favorites : [];
+        const isFav = favs.includes(activeCar.plate);
+        btn.className = 'fav-star-btn ' + (isFav ? 'is-fav' : '');
+        btn.innerText = isFav ? '⭐' : '☆';
+        btn.title = isFav ? 'Favorit entfernen' : 'Als Favorit speichern';
+    }
+
     /* --- HELPERS --- */
     function showDash() { document.getElementById('viewAdminControl').classList.add('hidden'); document.getElementById('viewDetail').classList.add('hidden'); document.getElementById('viewDash').classList.remove('hidden'); activeCar = null; checkNotifications(); renderCars(); }
-    function renderCars() { const list = document.getElementById('carList'); list.innerHTML = ''; state.cars.forEach(car => { const resp = state.users.find(u => u.email === car.responsibleEmail); const div = document.createElement('div'); div.className = 'car-card'; div.innerHTML = `<div class="license-plate"><div class="plate-eu"><span>D</span></div><div class="plate-text">${car.plate}</div></div><p>${car.brand} ${car.model}</p><div class="resp-info">👤 ${resp?resp.fname+' '+resp.lname:'Keiner'}</div>`; div.onclick = () => { activeFilter = { type: 'month', value: new Date().toISOString().slice(0,7) }; openCar(car); }; list.appendChild(div); }); }
-    function openCar(car) { activeCar = car; document.getElementById('viewDash').classList.add('hidden'); document.getElementById('viewDetail').classList.remove('hidden'); document.getElementById('detPlateText').innerText = car.plate; document.getElementById('detSub').innerText = car.brand + " " + car.model; const resp = state.users.find(u => u.email === car.responsibleEmail); document.getElementById('detResp').innerText = resp ? `Verantwortlich: ${resp.fname} ${resp.lname}` : ''; if(currentUser.isAdmin) document.getElementById('adminEditCarBtn').classList.remove('hidden'); renderEntries(); }
+    
+    function renderCars() { 
+        const list = document.getElementById('carList'); 
+        list.innerHTML = ''; 
+        const favs = (currentUser && currentUser.favorites) ? currentUser.favorites : [];
+        
+        // Sortieren: Favoriten stehen ZUERST oben!
+        const sortedCars = [...state.cars].sort((a, b) => {
+            const aFav = favs.includes(a.plate) ? 1 : 0;
+            const bFav = favs.includes(b.plate) ? 1 : 0;
+            return bFav - aFav;
+        });
+
+        sortedCars.forEach(car => { 
+            const resp = state.users.find(u => u.email === car.responsibleEmail); 
+            const isFav = favs.includes(car.plate);
+            const div = document.createElement('div'); 
+            div.className = 'car-card' + (isFav ? ' fav-card' : ''); 
+            div.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div class="license-plate"><div class="plate-eu"><span>D</span></div><div class="plate-text">${car.plate}</div></div>
+                    <button class="fav-star-btn ${isFav ? 'is-fav' : ''}" title="${isFav ? 'Favorit entfernen' : 'Als Favorit speichern'}" onclick="toggleFavorite('${car.plate}', event)">
+                        ${isFav ? '⭐' : '☆'}
+                    </button>
+                </div>
+                <p style="margin-top: 10px;">${car.brand} ${car.model}</p>
+                <div class="resp-info">👤 ${resp ? resp.fname+' '+resp.lname : 'Keiner'}</div>
+            `; 
+            div.onclick = () => { 
+                activeFilter = { type: 'month', value: new Date().toISOString().slice(0,7) }; 
+                openCar(car); 
+            }; 
+            list.appendChild(div); 
+        }); 
+    }
+
+    function openCar(car) { 
+        activeCar = car; 
+        document.getElementById('viewDash').classList.add('hidden'); 
+        document.getElementById('viewDetail').classList.remove('hidden'); 
+        document.getElementById('detPlateText').innerText = car.plate; 
+        document.getElementById('detSub').innerText = car.brand + " " + car.model; 
+        const resp = state.users.find(u => u.email === car.responsibleEmail); 
+        document.getElementById('detResp').innerText = resp ? `Verantwortlich: ${resp.fname} ${resp.lname}` : ''; 
+        if(currentUser.isAdmin) document.getElementById('adminEditCarBtn').classList.remove('hidden'); 
+        updateDetailFavStar();
+        renderEntries(); 
+    }
     function populateRespSelect() { const s = document.getElementById('cRespSelect'); s.innerHTML = '<option value="">-- Keiner --</option>'; state.users.forEach(u => { s.innerHTML += `<option value="${u.email}">${u.fname} ${u.lname}</option>`; }); }
     function exportUsersCSV() { let csv = "\uFEFFEmail;Vorname;Nachname;Abteilung;Einmalpasswort;Administrator\n"; state.users.forEach(u => { if(u.email==='admin')return; csv += `${u.email};${u.fname};${u.lname};${u.dept};alt;${u.isAdmin?'Ja':'Nein'}\n`; }); downloadFile(csv, "User.csv"); }
     function importUsersCSV(event) { 
@@ -1136,7 +1363,14 @@
     function importCarsCSV(event) { const f = event.target.files[0]; const r = new FileReader(); r.onload = function(e) { const lines = e.target.result.split(/\r?\n/); for(let i=1; i<lines.length; i++){ const c = lines[i].split(';'); if(c.length<5)continue; const p=c[0].trim(); const user=state.users.find(u=>`${u.fname} ${u.lname}`.toLowerCase()===(c[6]||"").trim().toLowerCase()); const car={plate:p, brand:c[1].trim(), model:c[2].trim(), fuel:c[3].trim(), startKm:parseInt(c[4].trim()), startDate:c[5]?c[5].trim():"", responsibleEmail:user?user.email:""}; let idx=state.cars.findIndex(x=>x.plate===p); if(idx!==-1)state.cars[idx]=car; else state.cars.push(car); } save(); renderCars(); alert("Import fertig."); }; r.readAsText(f); }
     function downloadFile(c, n) { const b = new Blob([c], {type:'text/csv;charset=utf-8;'}); const l = document.createElement("a"); l.href = URL.createObjectURL(b); l.download = n; l.click(); }
     function openExportModal() { const ws = XLSX.utils.json_to_sheet(state.entries); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Fahrten"); XLSX.writeFile(wb, "Fahrten_Export.xlsx"); }
-    function closeModals() { document.querySelectorAll('.modal').forEach(m => { if(!m.id.includes('Login')) m.classList.add('hidden'); }); }
+    function openModal(id) {
+        document.getElementById(id).classList.remove('hidden');
+        document.body.classList.add('modal-open');
+    }
+    function closeModals() { 
+        document.querySelectorAll('.modal').forEach(m => { if(!m.id.includes('Login')) m.classList.add('hidden'); }); 
+        document.body.classList.remove('modal-open');
+    }
     function closeMenu() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').style.display='none'; }
     function openMenu() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').style.display='block'; }
     function toggleFuelField() { document.getElementById('fuelFieldBox').classList.toggle('hidden', document.getElementById('fFuelCheck').value === 'nein'); }
